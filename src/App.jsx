@@ -28,6 +28,9 @@ const INITIAL_TASKS = [
 function App() {
   const [tasks, setTasks] = useState(INITIAL_TASKS);
   const [selectedTask, setSelectedTask] = useState(INITIAL_TASKS[0]);
+  const [isAddingTask, setIsAddingTask] = useState(false);
+  const [newTaskTitle, setNewTaskTitle] = useState('');
+  const [newTaskDesc, setNewTaskDesc] = useState('');
 
   const handleSelectTask = (task) => {
     setSelectedTask(task);
@@ -41,23 +44,26 @@ function App() {
     }
   };
 
-  const handleAddTask = () => {
-    // Placeholder functionality to show it works
+  const submitNewTask = () => {
+    if (!newTaskTitle.trim()) return;
     const newTask = {
       id: Date.now(),
-      title: 'New Task ' + (tasks.length + 1),
-      description: 'Description for the new task.',
+      title: newTaskTitle,
+      description: newTaskDesc,
       completed: false,
     };
     setTasks([...tasks, newTask]);
     setSelectedTask(newTask);
+    setIsAddingTask(false);
+    setNewTaskTitle('');
+    setNewTaskDesc('');
   };
 
   return (
-    <div className="min-h-screen bg-[#212121] text-white flex flex-col font-sans">
+    <div className="min-h-screen bg-[#212121] text-white flex flex-col font-sans relative">
       <Header />
       
-      <main className="flex-grow flex flex-col p-8 md:p-12 lg:p-16 max-w-7xl mx-auto w-full">
+      <main className="flex-grow flex flex-col p-8 md:p-12 lg:p-16 max-w-7xl mx-auto w-full relative z-0">
         {/* Main interactive area wrapper with specific background to match rounded inset area of screenshot */}
         <div className="flex bg-[#2a2a2a] rounded-lg shadow-lg flex-grow min-h-[500px]">
           <Sidebar 
@@ -71,8 +77,53 @@ function App() {
           />
         </div>
         
-        <AddTaskButton onAdd={handleAddTask} />
+        <AddTaskButton onAdd={() => setIsAddingTask(true)} />
       </main>
+
+      {/* Add Task Modal */}
+      {isAddingTask && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="bg-[#2a2a2a] p-8 rounded-lg shadow-2xl w-full max-w-md border border-[#3a3a3a]">
+            <h2 className="text-2xl font-bold mb-6 text-white">Add New Task</h2>
+            <div className="flex flex-col gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-400 mb-1">Title</label>
+                <input 
+                  type="text" 
+                  value={newTaskTitle}
+                  onChange={(e) => setNewTaskTitle(e.target.value)}
+                  className="w-full bg-[#1e1e1e] border border-[#4a4a4a] rounded-md px-4 py-2 text-white outline-none focus:border-white transition-colors"
+                  placeholder="Task title"
+                  autoFocus
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-400 mb-1">Description</label>
+                <textarea 
+                  value={newTaskDesc}
+                  onChange={(e) => setNewTaskDesc(e.target.value)}
+                  className="w-full bg-[#1e1e1e] border border-[#4a4a4a] rounded-md px-4 py-2 text-white outline-none focus:border-white transition-colors min-h-[100px] resize-y"
+                  placeholder="Task details"
+                />
+              </div>
+              <div className="flex justify-end gap-3 mt-4">
+                <button 
+                  onClick={() => setIsAddingTask(false)}
+                  className="px-4 py-2 rounded-md text-gray-300 hover:text-white transition-colors"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={submitNewTask}
+                  className="bg-white text-black px-6 py-2 rounded-md font-medium hover:bg-gray-200 transition-colors"
+                >
+                  Save Task
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
